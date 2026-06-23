@@ -1,0 +1,1180 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Our Family — হিসাব খাতা</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+Da+2:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<meta name="theme-color" content="#070b14">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Our Family">
+<meta name="description" content="Our Family — মেস ও ফ্যামিলির খরচের হিসাব এক অ্যাপে">
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyBFoLTfGkfMs7EPw6HAqLp1CxPVJ3CpQmU",
+    authDomain: "our-family-d26ef.firebaseapp.com",
+    projectId: "our-family-d26ef",
+    storageBucket: "our-family-d26ef.firebasestorage.app",
+    messagingSenderId: "460734492936",
+    appId: "1:460734492936:web:8321d2493e4d39df797cbd"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const fdb = firebase.firestore();
+</script>
+<style>
+  :root{
+    --navy:#0a1628; --navy2:#0f1d33; --teal:#22d3ee; --orange:#fb923c;
+    --bg:#070b14; --card:#0f1623; --ink:#eef2f8; --muted:#c2ccda;
+    --line:#1d2738; --good:#34d399; --bad:#fb7185; --goodbg:#0e2920; --badbg:#2b1418;
+    --neon:#22d3ee; --neon2:#a78bfa;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 28px rgba(0,0,0,.45);
+    --ring:1px solid rgba(255,255,255,.07);
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0;padding:0}
+  body{
+    font-family:'Plus Jakarta Sans','Baloo Da 2','Noto Sans Bengali',system-ui,sans-serif;
+    background:
+      radial-gradient(700px 320px at 12% -80px, rgba(34,211,238,.10), transparent 60%),
+      radial-gradient(600px 320px at 92% 4%, rgba(167,139,250,.10), transparent 60%),
+      var(--bg);
+    background-attachment:fixed;
+    color:var(--ink); line-height:1.55; -webkit-font-smoothing:antialiased;
+    max-width:480px; margin:0 auto; min-height:100vh; position:relative;
+  }
+  .screen{display:none; padding:0 0 100px}
+  .screen.active{display:block; animation:fade .3s cubic-bezier(.22,1,.36,1)}
+  @keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  @media (prefers-reduced-motion:reduce){.screen.active{animation:none}}
+
+  /* header */
+  .top{
+    background:linear-gradient(135deg,rgba(34,211,238,.14),rgba(167,139,250,.12)),var(--navy2);
+    color:#fff; padding:20px 18px 22px; position:sticky; top:0; z-index:20;
+    display:flex; align-items:center; gap:12px;
+    border-radius:0 0 24px 24px; border-bottom:1px solid rgba(34,211,238,.2);
+    box-shadow:0 10px 30px rgba(0,0,0,.5);
+  }
+  .top h1{font-size:18px; font-weight:700; flex:1; letter-spacing:.2px}
+  .top .sub{font-size:12px; opacity:.7; font-weight:400; display:block; margin-top:3px}
+  .back{background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.1); color:#fff; width:36px;height:36px;
+    border-radius:12px; font-size:21px; cursor:pointer; display:flex;align-items:center;justify-content:center;
+    transition:background .15s, transform .1s}
+  .back:active{transform:scale(.92);background:rgba(255,255,255,.18)}
+  .top .ico{width:40px;height:40px;border-radius:13px;background:rgba(34,211,238,.16);border:1px solid rgba(34,211,238,.25);
+    display:flex;align-items:center;justify-content:center;font-size:21px}
+
+  .wrap{padding:18px 16px}
+
+  /* login */
+  .login-hero{text-align:center; padding:58px 24px 20px}
+  .logo{width:84px;height:84px;border-radius:26px;margin:0 auto 18px;
+    background:linear-gradient(135deg,#22d3ee,#a78bfa);
+    display:flex;align-items:center;justify-content:center;font-size:40px;
+    box-shadow:0 0 40px rgba(34,211,238,.45), 0 14px 32px rgba(0,0,0,.5)}
+  .login-hero h2{font-size:25px;color:#fff;font-weight:700;letter-spacing:-.3px}
+  .login-hero p{color:var(--muted);font-size:14px;margin-top:5px}
+  .authtabs{display:flex;gap:8px;margin:6px 18px 4px}
+  .authtabs button{flex:1;padding:11px;border:1.5px solid var(--line);background:#0c121e;color:var(--muted);
+    border-radius:13px;font-family:inherit;font-weight:700;font-size:14px;cursor:pointer;transition:all .15s}
+  .authtabs button.on{background:linear-gradient(135deg,#22d3ee,#a78bfa);color:#06121a;border-color:transparent;box-shadow:0 0 16px rgba(34,211,238,.35)}
+
+  label{display:block;font-size:13px;font-weight:600;color:var(--muted);margin:15px 18px 6px}
+  input,select{
+    width:calc(100% - 36px); margin:0 18px; padding:14px 15px; font-size:15px;
+    border:1.5px solid var(--line); border-radius:14px; background:#0c121e;
+    font-family:inherit; color:var(--ink); outline:none; transition:border .15s, box-shadow .15s;
+  }
+  input::placeholder{color:#566173}
+  input:focus,select:focus{border-color:var(--neon);box-shadow:0 0 0 4px rgba(34,211,238,.15)}
+  .pin-input{letter-spacing:8px; text-align:center; font-size:20px; font-weight:700}
+
+  .btn{
+    width:calc(100% - 36px); margin:22px 18px 0; padding:15px; font-size:16px; font-weight:700;
+    border:0; border-radius:15px; cursor:pointer; font-family:inherit;
+    background:linear-gradient(135deg,#22d3ee,#0ea5b7); color:#04141a;
+    box-shadow:0 0 28px rgba(34,211,238,.4); transition:transform .12s, box-shadow .15s, filter .15s;
+  }
+  .btn:active{transform:translateY(1px) scale(.99);box-shadow:0 0 14px rgba(34,211,238,.3)}
+  .btn:focus-visible{outline:3px solid rgba(34,211,238,.45);outline-offset:2px}
+  .btn.ghost{background:#121a28;color:var(--neon);border:1.5px solid rgba(34,211,238,.3);box-shadow:none}
+  .btn.navy{background:linear-gradient(135deg,#a78bfa,#7c5cf0);color:#0b0716;box-shadow:0 0 24px rgba(167,139,250,.4)}
+  .btn.sm{width:auto;margin:0;padding:11px 16px;font-size:14px;box-shadow:none}
+
+  /* group cards */
+  .gcard{
+    background:var(--card); border-radius:20px; padding:16px 16px 16px 20px; margin-bottom:13px;
+    box-shadow:var(--shadow); cursor:pointer; display:flex; align-items:center; gap:14px;
+    border:var(--ring); position:relative; overflow:hidden;
+    transition:transform .15s ease, box-shadow .15s ease;
+  }
+  .gcard::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--neon);box-shadow:0 0 14px var(--neon)}
+  .gcard.mess::before{background:var(--orange);box-shadow:0 0 14px var(--orange)}
+  .gcard:active{transform:translateY(1px) scale(.995)}
+  .gcard .emoji{width:50px;height:50px;border-radius:16px;
+    background:linear-gradient(135deg,rgba(34,211,238,.16),rgba(167,139,250,.12));border:1px solid rgba(255,255,255,.06);
+    display:flex;align-items:center;justify-content:center;font-size:25px;flex-shrink:0}
+  .gcard .info{flex:1;min-width:0}
+  .gcard .info h3{font-size:16px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#fff}
+  .gcard .info .meta{font-size:12px;color:var(--muted);margin-top:3px;display:flex;align-items:center;gap:6px}
+  .tag{display:inline-block;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;
+    background:rgba(34,211,238,.16);color:var(--neon)}
+  .tag.mess{background:rgba(251,146,60,.16);color:var(--orange)}
+  .gcard .amt{text-align:right;flex-shrink:0}
+  .gcard .amt b{font-size:16px;color:#fff}
+  .gcard .amt span{display:block;font-size:10px;color:var(--muted);margin-top:1px}
+
+  .empty{text-align:center;padding:60px 24px;color:var(--muted)}
+  .empty .e{font-size:54px;margin-bottom:14px;opacity:.45}
+  .empty p{font-size:14px}
+
+  /* mode select */
+  .mode-card{
+    background:var(--card);border:2px solid var(--line);border-radius:20px;padding:20px;margin-bottom:14px;
+    cursor:pointer;transition:border .15s, transform .12s, box-shadow .15s; display:flex;gap:15px;align-items:flex-start;
+    box-shadow:var(--shadow)
+  }
+  .mode-card:active{transform:scale(.99)}
+  .mode-card.sel{border-color:var(--orange);background:rgba(251,146,60,.08);box-shadow:0 0 26px rgba(251,146,60,.2)}
+  .mode-card .me{font-size:34px;line-height:1}
+  .mode-card h3{font-size:17px;color:#fff;font-weight:700}
+  .mode-card p{font-size:13px;color:var(--muted);margin-top:3px}
+  .mode-card .feat{font-size:11px;color:var(--neon);margin-top:9px;font-weight:600}
+
+  /* dashboard stats */
+  .stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+  .stat{background:var(--card);border-radius:18px;padding:16px;box-shadow:var(--shadow);border:var(--ring)}
+  .stat .lbl{font-size:12px;color:var(--muted);font-weight:600;letter-spacing:.2px}
+  .stat .val{font-size:22px;font-weight:800;color:#fff;margin-top:5px;letter-spacing:-.5px}
+  .stat.full{grid-column:1/-1}
+  .stat.accent{background:linear-gradient(135deg,#0e7d8c 0%,#155e75 120%);color:#fff;
+    position:relative;overflow:hidden;border:1px solid rgba(34,211,238,.35);box-shadow:0 0 30px rgba(34,211,238,.25)}
+  .stat.accent::after{content:'';position:absolute;right:-34px;top:-34px;width:130px;height:130px;
+    border-radius:50%;background:rgba(34,211,238,.18)}
+  .stat.accent::before{content:'';position:absolute;right:18px;bottom:-26px;width:80px;height:80px;
+    border-radius:50%;background:rgba(255,255,255,.06)}
+  .stat.accent .lbl{color:rgba(255,255,255,.9)}
+  .stat.accent .val{color:#fff;font-size:30px;position:relative}
+  /* tinted stat variants */
+  .stat.t-teal{background:rgba(34,211,238,.10);border-color:rgba(34,211,238,.3)}
+  .stat.t-teal .val{color:var(--neon)}
+  .stat.t-green{background:rgba(52,211,153,.10);border-color:rgba(52,211,153,.3)}
+  .stat.t-green .val{color:var(--good)}
+  .stat.t-orange{background:rgba(251,146,60,.10);border-color:rgba(251,146,60,.3)}
+  .stat.t-orange .val{color:var(--orange)}
+  .stat.t-purple{background:rgba(167,139,250,.10);border-color:rgba(167,139,250,.3)}
+  .stat.t-purple .val{color:var(--neon2)}
+
+  /* tabs */
+  .tabbar{display:flex;gap:6px;margin:2px 0 16px;padding-bottom:2px}
+  .tabbtn{flex:1 1 0;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:9px 4px;border:var(--ring);border-radius:12px;
+    background:var(--card);box-shadow:var(--shadow);color:var(--muted);font-family:inherit;font-weight:700;font-size:12px;
+    cursor:pointer;transition:background .18s, color .18s, transform .1s, box-shadow .18s}
+  .tabbtn.on{background:linear-gradient(135deg,#22d3ee,#a78bfa);color:#06121a;border-color:transparent;
+    box-shadow:0 0 18px rgba(34,211,238,.4)}
+  .tabbtn:active{transform:scale(.96)}
+  .tabpane{display:none}
+  .tabpane.on{display:block;animation:fade .28s cubic-bezier(.22,1,.36,1)}
+
+  .sec-title{font-size:13.5px;font-weight:700;color:#fff;margin:22px 2px 11px;
+    display:flex;align-items:center;gap:8px;letter-spacing:.2px}
+
+  .panel{background:var(--card);border-radius:18px;box-shadow:var(--shadow);overflow:hidden;border:var(--ring)}
+  .row{display:flex;align-items:center;gap:13px;padding:14px 16px;border-bottom:1px solid var(--line)}
+  .row:last-child{border-bottom:0}
+  .av{width:40px;height:40px;border-radius:13px;
+    background:linear-gradient(135deg,rgba(34,211,238,.18),rgba(167,139,250,.16));color:#fff;
+    display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;flex-shrink:0}
+  .row .nm{flex:1;min-width:0}
+  .row .nm b{font-size:14.5px;display:block;color:var(--ink)}
+  .row .nm small{font-size:11.5px;color:var(--muted)}
+  .row .rt{text-align:right;font-weight:700;font-size:14.5px;color:#fff}
+  .pos{color:var(--good)} .neg{color:var(--bad)}
+
+  /* settlement cards */
+  .settle-card{background:var(--card);border-radius:16px;box-shadow:var(--shadow);padding:14px;margin-bottom:11px;
+    display:flex;align-items:center;gap:13px;border:var(--ring);position:relative;overflow:hidden}
+  .settle-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--line)}
+  .settle-card.out::before{background:var(--good);box-shadow:0 0 12px var(--good)}
+  .settle-card.in::before{background:var(--bad);box-shadow:0 0 12px var(--bad)}
+  .settle-card .sav{width:42px;height:42px;border-radius:13px;display:flex;align-items:center;justify-content:center;
+    font-size:18px;flex-shrink:0;font-weight:700;margin-left:6px}
+  .sav.fund{background:rgba(34,211,238,.16);color:var(--neon)}
+  .sav.person{background:rgba(255,255,255,.08);color:#fff}
+  .settle-card .sflow{flex:1;min-width:0}
+  .settle-card .sflow b{font-size:14.5px;display:block;color:var(--ink)}
+  .settle-card .sflow small{font-size:11.5px;color:var(--muted)}
+  .settle-card .s-amt{font-weight:800;font-size:17px}
+  .s-amt.pos{color:var(--good)} .s-amt.neg{color:var(--bad)}
+  .all-clear{background:var(--card);border-radius:16px;box-shadow:var(--shadow);padding:24px;text-align:center;color:var(--good);font-weight:700;border:var(--ring)}
+
+  /* colored card headers / accents */
+  .panel.lead, .report-card.lead{border-top:3px solid var(--neon)}
+  .panel.lead-orange, .report-card.lead-orange{border-top:3px solid var(--orange)}
+  .panel.lead-green, .report-card.lead-green{border-top:3px solid var(--good)}
+  .panel.lead-purple, .report-card.lead-purple{border-top:3px solid var(--neon2)}
+  .row .rt.money{color:var(--neon)}
+
+  /* donut chart */
+  .donut-wrap{display:flex;align-items:center;gap:18px;padding:4px 2px 6px}
+  .donut{width:120px;height:120px;border-radius:50%;flex-shrink:0;position:relative;
+    display:flex;align-items:center;justify-content:center;box-shadow:0 0 24px rgba(52,211,153,.25)}
+  .donut::after{content:'';position:absolute;width:74px;height:74px;border-radius:50%;background:var(--card)}
+  .donut .dc{position:relative;z-index:1;text-align:center}
+  .donut .dc b{font-size:17px;font-weight:800;color:#fff;display:block;line-height:1.1}
+  .donut .dc span{font-size:10px;color:var(--muted)}
+  .legend{flex:1;display:flex;flex-direction:column;gap:9px;min-width:0}
+  .leg-row{display:flex;align-items:center;gap:9px;font-size:13px}
+  .leg-dot{width:11px;height:11px;border-radius:4px;flex-shrink:0}
+  .leg-name{flex:1;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .leg-val{font-weight:700;color:#fff}
+
+  /* yearly / monthly breakdown */
+  .yhead{display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .ynav{width:38px;height:38px;border-radius:12px;border:var(--ring);background:#121a28;color:var(--neon);
+    font-size:22px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;
+    box-shadow:var(--shadow);transition:transform .1s}
+  .ynav:active{transform:scale(.92)}
+  .ytitle{font-size:24px;font-weight:800;color:#fff;text-align:center;line-height:1}
+  .ytitle span{display:block;font-size:11px;font-weight:600;color:var(--muted);margin-top:2px}
+  .gavewrap{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}
+  .givechip{font-size:12px;background:rgba(34,211,238,.12);color:var(--neon);
+    padding:5px 11px;border-radius:20px;font-weight:600;border:1px solid rgba(34,211,238,.25)}
+  .givechip b{color:#fff;font-weight:700}
+  .mrow{padding:13px 15px;border-bottom:1px solid var(--line)}
+  .mrow:last-child{border-bottom:0}
+  .mrow-top{display:flex;justify-content:space-between;align-items:baseline}
+  .mrow-top b{font-size:14.5px;color:#fff}
+  .mexp{font-weight:700;font-size:14px;color:var(--orange)}
+  .mgave{font-size:11.5px;color:var(--muted)}
+
+  /* report breakdown card */
+  .report-card{background:var(--card);border-radius:18px;box-shadow:var(--shadow);padding:18px;margin-bottom:13px;border:var(--ring)}
+  .report-card .rc-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:16px}
+  .report-card .rc-lbl{font-size:13px;color:var(--muted);font-weight:600}
+  .report-card .rc-big{font-size:27px;font-weight:800;color:#fff;letter-spacing:-.5px}
+  .breakdown{display:flex;flex-direction:column;gap:7px}
+  .bd-row{display:flex;align-items:center;gap:9px}
+  .bd-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+  .bd-name{flex:1;font-size:13px;color:var(--ink)}
+  .bd-val{font-weight:700;font-size:13px;color:#fff}
+  .bd-bar{height:9px;border-radius:6px;background:#0b1120;overflow:hidden;margin:2px 0 7px}
+  .bd-bar i{display:block;height:100%;border-radius:6px;transition:width .5s cubic-bezier(.22,1,.36,1)}
+  .recon{display:flex;flex-direction:column;gap:9px}
+  .recon .rec-row{display:flex;justify-content:space-between;align-items:center;font-size:14px;color:var(--ink)}
+  .recon .rec-row b{font-weight:700;color:#fff}
+  .recon .rec-row.sub{font-size:11px;color:var(--muted);margin-top:-6px}
+  .recon .rec-row.total{border-top:2px solid var(--line);padding-top:11px;margin-top:3px;font-weight:700}
+  .recon .rec-row.total span{color:var(--good)} .recon .rec-row.total b{color:var(--good);font-size:18px}
+
+  .txn{padding:13px 16px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:13px}
+  .txn:last-child{border-bottom:0}
+  .txn .ti{width:38px;height:38px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
+  .ti.fund{background:rgba(34,211,238,.16);color:var(--neon)}
+  .ti.personal{background:rgba(251,146,60,.16);color:var(--orange)}
+  .ti.pool{background:rgba(52,211,153,.16);color:var(--good)}
+  .txn .td{flex:1;min-width:0}
+  .txn .td b{font-size:14.5px;color:var(--ink)}
+  .txn .td small{font-size:11.5px;color:var(--muted);display:block}
+  .txn .tamt{font-weight:700;font-size:14.5px;color:#fff}
+  .txn.tap{cursor:pointer;transition:background .15s}
+  .txn.tap:active{background:rgba(255,255,255,.04)}
+  .txn .chev{color:var(--muted);font-weight:700;font-size:17px;margin-left:8px;opacity:.7}
+
+  .sheet-bg{position:fixed;inset:0;background:rgba(2,6,14,.7);z-index:40;display:none;
+    align-items:flex-end;justify-content:center;backdrop-filter:blur(3px)}
+  .sheet-bg.show{display:flex;animation:fade .2s ease}
+  .sheet{background:#0f1623;width:100%;max-width:480px;border-radius:26px 26px 0 0;padding:8px 0 26px;
+    border-top:1px solid rgba(34,211,238,.2);
+    animation:up .32s cubic-bezier(.22,1,.36,1);box-shadow:0 -12px 50px rgba(0,0,0,.7)}
+  @keyframes up{from{transform:translateY(100%)}to{transform:none}}
+  .grab{width:42px;height:5px;background:var(--line);border-radius:3px;margin:8px auto 8px}
+  .sheet h3{padding:6px 18px 4px;font-size:19px;color:#fff;font-weight:700}
+
+  .seg{display:flex;gap:9px;padding:8px 18px 0}
+  .seg button{flex:1;padding:13px 4px;border:1.5px solid var(--line);background:#0c121e;border-radius:14px;
+    cursor:pointer;font-family:inherit;font-size:12px;font-weight:700;color:var(--muted);line-height:1.3;
+    transition:border .15s, background .15s, color .15s}
+  .seg button .se{font-size:21px;display:block;margin-bottom:4px}
+  .seg button.on{border-color:var(--orange);background:rgba(251,146,60,.12);color:var(--orange)}
+
+  .invite{background:var(--card);border-radius:18px;padding:20px;box-shadow:var(--shadow);text-align:center;margin-bottom:14px;border:var(--ring)}
+  .invite .code{font-size:32px;font-weight:800;letter-spacing:7px;color:var(--neon);
+    background:rgba(34,211,238,.1);border-radius:14px;padding:14px;margin:11px 0;font-family:monospace}
+  .invite p{font-size:13px;color:var(--muted)}
+
+  .toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:#161f30;border:1px solid rgba(34,211,238,.3);
+    color:#fff;padding:12px 22px;border-radius:30px;font-size:13px;z-index:60;opacity:0;
+    transition:opacity .25s;pointer-events:none;white-space:nowrap;box-shadow:0 8px 30px rgba(0,0,0,.6)}
+  .toast.show{opacity:1}
+  .hint{font-size:12px;color:var(--muted);margin:8px 18px 0;text-align:center}
+  .demo-pill{font-size:10px;background:rgba(34,211,238,.18);color:var(--neon);border:1px solid rgba(34,211,238,.3);padding:3px 9px;border-radius:20px;font-weight:700}
+
+  /* bottom navigation */
+  .botnav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;
+    background:rgba(12,18,28,.92);backdrop-filter:blur(12px);border-top:1px solid rgba(34,211,238,.18);display:flex;z-index:25;
+    box-shadow:0 -8px 30px rgba(0,0,0,.55);padding:6px 6px calc(6px + env(safe-area-inset-bottom))}
+  .botnav button{flex:1;background:none;border:0;font-family:inherit;cursor:pointer;padding:7px 2px;
+    display:flex;flex-direction:column;align-items:center;gap:3px;color:var(--muted);font-size:11px;font-weight:600;
+    border-radius:12px;transition:color .15s,background .15s}
+  .botnav button .bi{font-size:21px;line-height:1}
+  .botnav button.on{color:var(--neon)}
+  .botnav button.on .bi{transform:translateY(-1px);filter:drop-shadow(0 0 6px var(--neon))}
+  .botnav button:active{background:rgba(255,255,255,.05)}
+
+  /* menu drawer */
+  .drawer-bg{position:fixed;inset:0;background:rgba(2,6,14,.7);z-index:50;display:none;backdrop-filter:blur(3px)}
+  .drawer-bg.show{display:block;animation:fade .2s ease}
+  .drawer{position:fixed;top:0;right:0;height:100%;width:80%;max-width:330px;background:#0c121e;z-index:51;
+    transform:translateX(100%);transition:transform .3s cubic-bezier(.22,1,.36,1);border-left:1px solid rgba(34,211,238,.2);
+    box-shadow:-12px 0 50px rgba(0,0,0,.7);display:flex;flex-direction:column}
+  .drawer.show{transform:none}
+  .drawer-head{background:linear-gradient(135deg,rgba(34,211,238,.22),rgba(167,139,250,.18)),var(--navy2);color:#fff;padding:24px 20px 20px;border-bottom:1px solid rgba(34,211,238,.2)}
+  .drawer-head .dav{width:52px;height:52px;border-radius:16px;background:rgba(34,211,238,.2);border:1px solid rgba(34,211,238,.3);
+    display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:700;margin-bottom:10px}
+  .drawer-head h3{font-size:18px;font-weight:700}
+  .drawer-head p{font-size:12px;opacity:.8;margin-top:2px}
+  .drawer-body{flex:1;overflow-y:auto;padding:10px}
+  .mitem{display:flex;align-items:center;gap:14px;padding:14px 14px;border-radius:14px;cursor:pointer;
+    font-size:15px;font-weight:600;color:var(--ink);transition:background .15s}
+  .mitem:active{background:rgba(255,255,255,.05)}
+  .mitem .mic{width:38px;height:38px;border-radius:11px;background:rgba(255,255,255,.06);display:flex;align-items:center;justify-content:center;font-size:18px}
+  .mitem.danger{color:var(--bad)}
+  .mdivide{height:1px;background:var(--line);margin:8px 12px}
+  .mcode{background:rgba(34,211,238,.1);border:1px solid rgba(34,211,238,.22);border-radius:14px;padding:14px;margin:10px 6px;text-align:center}
+  .mcode .c{font-size:24px;font-weight:800;letter-spacing:5px;color:var(--neon);font-family:monospace}
+  .mcode small{font-size:11px;color:var(--muted)}
+</style>
+</head>
+<body>
+
+<!-- ============ LOGIN ============ -->
+<section class="screen active" id="s-login">
+  <div class="login-hero">
+    <div class="logo">📒</div>
+    <h2>Our Family</h2>
+    <p>মেস ও ফ্যামিলি — এক অ্যাপে সব হিসাব</p>
+  </div>
+
+  <div class="authtabs">
+    <button id="authLogin" class="on" onclick="setAuthMode('login')">প্রবেশ</button>
+    <button id="authSignup" onclick="setAuthMode('signup')">নতুন অ্যাকাউন্ট</button>
+  </div>
+
+  <div id="nameWrap" style="display:none">
+    <label>আপনার নাম</label>
+    <input id="loginName" placeholder="যেমন: ইনসাফ" autocomplete="name">
+  </div>
+  <label>ইমেইল</label>
+  <input id="loginEmail" type="email" placeholder="you@email.com" autocomplete="email">
+  <label>পাসওয়ার্ড</label>
+  <input id="loginPass" type="password" placeholder="৬+ অক্ষর" autocomplete="current-password">
+
+  <button class="btn" id="authBtn" onclick="doAuth()">প্রবেশ করুন</button>
+
+  <p class="hint" onclick="forgotPass()" style="cursor:pointer;color:var(--neon);margin-top:14px">পাসওয়ার্ড ভুলে গেছেন?</p>
+</section>
+
+<!-- ============ MY GROUPS ============ -->
+<section class="screen" id="s-groups">
+  <div class="top">
+    <div class="ico">📒</div>
+    <h1>Our Family<span class="sub" id="hiName"></span></h1>
+    <span class="demo-pill">DEMO</span>
+  </div>
+  <div class="wrap">
+    <div id="groupList"></div>
+    <button class="btn navy" onclick="go('s-create')">+ নতুন গ্রুপ তৈরি করুন</button>
+    <button class="btn ghost" onclick="openJoin()">কোড দিয়ে যোগ দিন</button>
+  </div>
+</section>
+
+<!-- ============ CREATE GROUP ============ -->
+<section class="screen" id="s-create">
+  <div class="top">
+    <button class="back" onclick="go('s-groups')">‹</button>
+    <h1>নতুন গ্রুপ</h1>
+  </div>
+  <div class="wrap">
+    <p class="sec-title">গ্রুপের ধরন বাছুন</p>
+    <div class="mode-card mess" id="md-mess" onclick="pickMode('mess')">
+      <div class="me">🏠</div>
+      <div>
+        <h3>মেস / ম্যাচ</h3>
+        <p>বন্ধু, মেস, রুমমেটদের জন্য</p>
+        <div class="feat">✓ সমান ভাগ ✓ সেটেলমেন্ট (কে কত দিবে)</div>
+      </div>
+    </div>
+    <div class="mode-card" id="md-family" onclick="pickMode('family')">
+      <div class="me">🏡</div>
+      <div>
+        <h3>ফ্যামিলি</h3>
+        <p>পরিবারের জন্য</p>
+        <div class="feat">✓ ট্র্যাকিং + রিপোর্ট • সেটেলমেন্ট নেই</div>
+      </div>
+    </div>
+    <label>গ্রুপের নাম</label>
+    <input id="newGroupName" placeholder="যেমন: ঢাকা মেস / আমার পরিবার" autocomplete="off">
+    <button class="btn" onclick="createGroup()">গ্রুপ তৈরি করুন</button>
+  </div>
+</section>
+
+<!-- ============ GROUP DASHBOARD ============ -->
+<section class="screen" id="s-dash">
+  <div class="top">
+    <button class="back" onclick="go('s-groups')">‹</button>
+    <h1 id="dashTitle">গ্রুপ<span class="sub" id="dashSub"></span></h1>
+    <button class="back" onclick="openMenu()">☰</button>
+  </div>
+  <div class="wrap" id="dashBody"></div>
+</section>
+
+<!-- ============ SETTINGS ============ -->
+<section class="screen" id="s-settings">
+  <div class="top">
+    <button class="back" onclick="go('s-dash')">‹</button>
+    <h1>গ্রুপ সেটিংস</h1>
+  </div>
+  <div class="wrap" id="settBody"></div>
+</section>
+
+<!-- ============ ADD TXN SHEET ============ -->
+<div class="sheet-bg" id="addSheet">
+  <div class="sheet">
+    <div class="grab"></div>
+    <h3 id="addTitle">নতুন এন্ট্রি</h3>
+    <div class="seg" id="typeSeg">
+      <button data-t="fund" onclick="pickType('fund')"><span class="se">💰</span>ফান্ডে টাকা</button>
+      <button data-t="pool" onclick="pickType('pool')"><span class="se">🛒</span>ফান্ড থেকে খরচ</button>
+      <button data-t="personal" onclick="pickType('personal')"><span class="se">👛</span>নিজ হাতে খরচ</button>
+    </div>
+    <p class="hint" id="typeHint">ফান্ডে টাকা = পুল-এ জমা দিলেন</p>
+    <label>টাকার পরিমাণ (৳)</label>
+    <input id="txnAmt" type="tel" placeholder="0" autocomplete="off">
+    <label>বিবরণ (ঐচ্ছিক)</label>
+    <input id="txnNote" placeholder="যেমন: বাজার, বিল" autocomplete="off">
+    <div style="display:flex;gap:10px;padding:0 18px;margin-top:18px">
+      <button class="btn ghost sm" style="flex:1" onclick="closeAdd()">বাতিল</button>
+      <button class="btn sm" style="flex:1" onclick="saveTxn()">সেভ করুন</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ JOIN SHEET ============ -->
+<div class="sheet-bg" id="joinSheet">
+  <div class="sheet">
+    <div class="grab"></div>
+    <h3>কোড দিয়ে যোগ দিন</h3>
+    <label>৮-সংখ্যার গ্রুপ কোড</label>
+    <input id="joinCode" class="pin-input" maxlength="8" placeholder="••••••••" autocomplete="off" style="letter-spacing:5px">
+    <div style="display:flex;gap:10px;padding:0 18px;margin-top:18px">
+      <button class="btn ghost sm" style="flex:1" onclick="closeJoin()">বাতিল</button>
+      <button class="btn sm" style="flex:1" onclick="doJoin()">যোগ দিন</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ TXN ACTION SHEET ============ -->
+<div class="sheet-bg" id="actSheet">
+  <div class="sheet">
+    <div class="grab"></div>
+    <h3>এন্ট্রি</h3>
+    <p class="hint" id="actInfo" style="text-align:left;margin:0 18px 4px"></p>
+    <div style="padding:8px 18px 0">
+      <button class="btn navy" style="margin:6px 0 0;width:100%" onclick="startEdit()">✏️ এডিট করুন</button>
+      <button class="btn" style="margin:10px 0 0;width:100%;background:linear-gradient(135deg,#e2574c,#c2410c);box-shadow:0 8px 20px rgba(194,65,12,.28)" onclick="startDelete()">🗑️ ডিলেট করুন</button>
+      <button class="btn ghost" style="margin:10px 0 0;width:100%" onclick="closeActSheet()">বাতিল</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ============ BOTTOM NAV ============ -->
+<nav class="botnav" id="botnav" style="display:none">
+  <button id="nav-home" class="on" onclick="navHome()"><span class="bi">🏠</span>হোম</button>
+  <button onclick="openAdd()"><span class="bi">➕</span>যোগ</button>
+  <button onclick="navReport()"><span class="bi">📅</span>রিপোর্ট</button>
+  <button onclick="go('s-groups')"><span class="bi">👥</span>গ্রুপ</button>
+</nav>
+
+<!-- ============ MENU DRAWER ============ -->
+<div class="drawer-bg" id="drawerBg" onclick="closeMenu()"></div>
+<aside class="drawer" id="drawer">
+  <div class="drawer-head">
+    <div class="dav" id="drawAv">?</div>
+    <h3 id="drawName">—</h3>
+    <p id="drawGroup">—</p>
+  </div>
+  <div class="drawer-body">
+    <div class="mcode">
+      <small>গ্রুপ কোড — শেয়ার করে সদস্য যোগ করুন</small>
+      <div class="c" id="drawCode">------</div>
+    </div>
+    <div class="mitem" onclick="menuCopyCode()"><div class="mic">📋</div>কোড কপি করুন</div>
+    <div class="mitem" onclick="menuSettings()"><div class="mic">👥</div><span id="drawMembers">সদস্য</span></div>
+    <div class="mitem" onclick="menuGroups()"><div class="mic">🏠</div>আমার সব গ্রুপ</div>
+    <div class="mdivide"></div>
+    <div class="mitem danger" onclick="menuLogout()"><div class="mic">🚪</div>লগ আউট</div>
+  </div>
+</aside>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ---------- Firebase already initialized in <head>; auth & fdb are global ---------- */
+
+/* ---------- live cache (synced from Firestore) ---------- */
+let DB={groups:[],txns:[],activity:[],userName:'',userId:null};
+let curGroupId=null, pendingMode=null, pendingType='fund';
+let editingTxnId=null, pendingActTxn=null, viewYear=null, authMode='login', pendingSignupName='';
+let unsubGroups=null, unsubTxns=null, unsubActivity=null, unsubGroupDoc=null;
+
+function meId(){return DB.userId;}
+function meName(){return DB.userName||'';}
+function newCode(){return String(Math.floor(10000000+Math.random()*90000000));} // 8 digit
+
+/* activity log -> Firestore */
+function logAct(gid,action,desc){
+  fdb.collection('activity').add({gid,uid:meId(),un:meName(),action,desc,date:Date.now()});
+}
+
+/* ---------- helpers ---------- */
+const $=id=>document.getElementById(id);
+const tk=n=>'৳'+Math.round(n).toLocaleString('en-IN');
+function go(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));$(id).classList.add('active');window.scrollTo(0,0);const bn=$('botnav');if(bn)bn.style.display=(id==='s-dash')?'flex':'none';}
+function toast(m){const t=$('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200);}
+function initials(n){return (n||'?').trim().charAt(0);}
+
+/* ---------- auth (email + password) ---------- */
+function setAuthMode(m){
+  authMode=m;
+  $('authLogin').classList.toggle('on',m==='login');
+  $('authSignup').classList.toggle('on',m==='signup');
+  $('nameWrap').style.display = m==='signup'?'block':'none';
+  $('authBtn').textContent = m==='signup'?'অ্যাকাউন্ট তৈরি করুন':'প্রবেশ করুন';
+}
+function doAuth(){
+  const email=$('loginEmail').value.trim(), pass=$('loginPass').value;
+  if(!email||!/.+@.+\..+/.test(email)){toast('সঠিক ইমেইল দিন');return;}
+  if(pass.length<6){toast('পাসওয়ার্ড অন্তত ৬ অক্ষর');return;}
+  $('authBtn').disabled=true;
+  if(authMode==='signup'){
+    const nm=$('loginName').value.trim();
+    if(!nm){toast('নাম লিখুন');$('authBtn').disabled=false;return;}
+    pendingSignupName=nm;
+    auth.createUserWithEmailAndPassword(email,pass)
+      .catch(e=>{pendingSignupName='';toast(authErr(e));})
+      .finally(()=>$('authBtn').disabled=false);
+  }else{
+    auth.signInWithEmailAndPassword(email,pass)
+      .catch(e=>toast(authErr(e)))
+      .finally(()=>$('authBtn').disabled=false);
+  }
+}
+function forgotPass(){
+  const email=$('loginEmail').value.trim();
+  if(!email){toast('আগে ইমেইল লিখুন');return;}
+  auth.sendPasswordResetEmail(email)
+    .then(()=>toast('রিসেট লিংক ইমেইলে পাঠানো হয়েছে'))
+    .catch(e=>toast(authErr(e)));
+}
+function authErr(e){
+  const c=e.code||'';
+  if(c.includes('email-already-in-use'))return'এই ইমেইলে অ্যাকাউন্ট আছে — লগইন করুন';
+  if(c.includes('invalid-credential')||c.includes('wrong-password')||c.includes('user-not-found'))return'ইমেইল বা পাসওয়ার্ড ভুল';
+  if(c.includes('weak-password'))return'পাসওয়ার্ড দুর্বল';
+  if(c.includes('network'))return'ইন্টারনেট সংযোগ দেখুন';
+  return'সমস্যা: '+(e.message||c);
+}
+function logout(){
+  detachAll();
+  auth.signOut();
+}
+function detachAll(){
+  [unsubGroups,unsubTxns,unsubActivity,unsubGroupDoc].forEach(u=>{if(u)u();});
+  unsubGroups=unsubTxns=unsubActivity=unsubGroupDoc=null;
+}
+
+/* auth state -> route */
+auth.onAuthStateChanged(async user=>{
+  if(user){
+    DB.userId=user.uid;
+    try{
+      const ref=fdb.collection('users').doc(user.uid);
+      const d=await ref.get();
+      if(d.exists&&d.data().name){
+        DB.userName=d.data().name;
+      }else{
+        DB.userName=pendingSignupName||user.email.split('@')[0];
+        await ref.set({name:DB.userName,email:user.email},{merge:true});
+      }
+    }catch(e){ DB.userName=pendingSignupName||user.email.split('@')[0]; }
+    pendingSignupName='';
+    $('hiName').textContent=DB.userName;
+    listenGroups();
+    go('s-groups');
+  }else{
+    DB.userId=null; DB.userName=''; DB.groups=[]; DB.txns=[]; DB.activity=[];
+    go('s-login');
+  }
+});
+
+/* ---------- live groups for this user ---------- */
+function listenGroups(){
+  if(unsubGroups)unsubGroups();
+  unsubGroups=fdb.collection('groups').where('memberIds','array-contains',meId())
+    .onSnapshot(snap=>{
+      DB.groups=snap.docs.map(d=>Object.assign({id:d.id},d.data()));
+      const ids=DB.groups.map(g=>g.id);
+      listenTxns(ids);
+      if($('s-groups').classList.contains('active')) renderGroups();
+      if($('s-dash').classList.contains('active')&&curGroupId) reopenDash();
+    },err=>toast('গ্রুপ লোড সমস্যা: '+err.code));
+}
+
+/* live transactions across all my groups (Firestore 'in' max 30) */
+function listenTxns(ids){
+  if(unsubTxns)unsubTxns();
+  if(!ids.length){DB.txns=[];return;}
+  const chunk=ids.slice(0,30);
+  unsubTxns=fdb.collection('transactions').where('gid','in',chunk)
+    .onSnapshot(snap=>{
+      DB.txns=snap.docs.map(d=>Object.assign({id:d.id},d.data()));
+      if($('s-dash').classList.contains('active')&&curGroupId) reopenDash();
+    },err=>toast('এন্ট্রি লোড সমস্যা: '+err.code));
+}
+
+/* live activity log for the open group */
+function listenActivity(gid){
+  if(unsubActivity)unsubActivity();
+  unsubActivity=fdb.collection('activity').where('gid','==',gid)
+    .onSnapshot(snap=>{
+      DB.activity=snap.docs.map(d=>Object.assign({id:d.id},d.data())).sort((a,b)=>b.date-a.date);
+      if($('s-dash').classList.contains('active')&&curGroupId===gid) reopenDash();
+    },err=>{/* ignore */});
+}
+
+/* re-render dashboard preserving the active tab (no scroll jump) */
+function reopenDash(){
+  const active=document.querySelector('#dashBody .tabbtn.on');
+  const tabName=active?active.getAttribute('data-tabname'):null;
+  const y=window.scrollY;
+  openGroup(curGroupId,true);
+  if(tabName){
+    document.querySelectorAll('#dashBody .tabbtn').forEach(b=>b.classList.toggle('on',b.getAttribute('data-tabname')===tabName));
+    document.querySelectorAll('#dashBody .tabpane').forEach(p=>p.classList.toggle('on',p.dataset.tab===tabName));
+  }
+  window.scrollTo(0,y);
+}
+
+/* ---------- my groups ---------- */
+function renderGroups(){
+  const box=$('groupList');
+  if(!DB.groups.length){
+    box.innerHTML=`<div class="empty"><div class="e">📭</div><p>এখনো কোনো গ্রুপ নেই।<br>নতুন গ্রুপ তৈরি করুন বা কোড দিয়ে যোগ দিন।</p></div>`;
+    return;
+  }
+  box.innerHTML=DB.groups.map(g=>{
+    const isMess=g.mode==='mess';
+    return `<div class="gcard ${isMess?'mess':''}" onclick="openGroup('${g.id}')">
+      <div class="emoji" style="background:${isMess?'rgba(251,146,60,.16)':'rgba(34,211,238,.16)'}">${isMess?'🏠':'🏡'}</div>
+      <div class="info">
+        <h3>${g.name}</h3>
+        <div class="meta">${(g.members||[]).length} জন • <span class="tag ${isMess?'mess':''}">${isMess?'মেস':'ফ্যামিলি'}</span></div>
+      </div>
+      <div class="amt"><span style="font-size:11px">খুলুন ›</span></div>
+    </div>`;
+  }).join('');
+}
+
+/* ---------- create group ---------- */
+function pickMode(m){
+  pendingMode=m;
+  $('md-mess').classList.toggle('sel',m==='mess');
+  $('md-family').classList.toggle('sel',m==='family');
+}
+function createGroup(){
+  if(!pendingMode){toast('গ্রুপের ধরন বাছুন');return;}
+  const nm=$('newGroupName').value.trim();
+  if(!nm){toast('গ্রুপের নাম লিখুন');return;}
+  const code=newCode();
+  fdb.collection('groups').add({
+    name:nm,mode:pendingMode,code,adminId:meId(),
+    members:[{id:meId(),name:meName()}],memberIds:[meId()],createdAt:Date.now()
+  }).then(ref=>{
+    logAct(ref.id,'create','গ্রুপ তৈরি করল: '+nm);
+    $('newGroupName').value=''; pendingMode=null;
+    $('md-mess').classList.remove('sel'); $('md-family').classList.remove('sel');
+    go('s-groups'); toast('গ্রুপ তৈরি হয়েছে • কোড: '+code);
+  }).catch(e=>toast('তৈরি করা যায়নি: '+e.code));
+}
+
+/* ---------- join ---------- */
+function openJoin(){$('joinSheet').classList.add('show');}
+function closeJoin(){$('joinSheet').classList.remove('show');$('joinCode').value='';}
+function doJoin(){
+  const c=$('joinCode').value.trim();
+  if(!c){toast('কোড দিন');return;}
+  fdb.collection('groups').where('code','==',c).limit(1).get().then(snap=>{
+    if(snap.empty){toast('এই কোডে কোনো গ্রুপ নেই');return;}
+    const doc=snap.docs[0], g=doc.data();
+    if((g.memberIds||[]).includes(meId())){toast('আপনি ইতিমধ্যে এই গ্রুপে আছেন');closeJoin();return;}
+    doc.ref.update({
+      members:firebase.firestore.FieldValue.arrayUnion({id:meId(),name:meName()}),
+      memberIds:firebase.firestore.FieldValue.arrayUnion(meId())
+    }).then(()=>{
+      logAct(doc.id,'join','গ্রুপে যোগ দিল');
+      closeJoin(); toast('যোগ দিয়েছেন: '+g.name);
+    });
+  }).catch(e=>toast('সমস্যা: '+e.code));
+}
+
+/* ---------- group computations ---------- */
+function compute(g){
+  const t=DB.txns.filter(x=>x.gid===g.id);
+  const fund=t.filter(x=>x.type==='fund').reduce((a,b)=>a+b.amt,0);
+  const pool=t.filter(x=>x.type==='pool').reduce((a,b)=>a+b.amt,0);
+  const personal=t.filter(x=>x.type==='personal').reduce((a,b)=>a+b.amt,0);
+  const totalDeposit=fund+personal;   // নিজ হাতে খরচও ফান্ডে জমা হিসেবে গণ্য
+  const totalExpense=pool+personal;   // ফান্ড থেকে খরচ + নিজ হাতে খরচ
+  const fundBalance=totalDeposit-totalExpense; // = fund - pool
+  const perHead=g.members.length?totalExpense/g.members.length:0;
+  // per member: paid = fund দেওয়া + personal খরচ
+  const byUser=g.members.map(m=>{
+    const mt=t.filter(x=>x.uid===m.id);
+    const gave=mt.filter(x=>x.type==='fund').reduce((a,b)=>a+b.amt,0);
+    const pers=mt.filter(x=>x.type==='personal').reduce((a,b)=>a+b.amt,0);
+    const poolSpent=mt.filter(x=>x.type==='pool').reduce((a,b)=>a+b.amt,0);
+    const spent=poolSpent+pers;
+    const paid=gave+pers;
+    return {...m,gave,pers,poolSpent,spent,paid,net:paid-perHead};
+  });
+  return {t,fund,pool,personal,totalDeposit,totalExpense,fundBalance,perHead,byUser};
+}
+
+/* month-end close: everyone settles against the fund */
+function settleFund(byUser){
+  const out=[];
+  byUser.forEach(u=>{ if(u.net<-0.5) out.push({kind:'in',name:u.name,amt:-u.net}); });   // pays into fund
+  byUser.forEach(u=>{ if(u.net>0.5)  out.push({kind:'out',name:u.name,amt:u.net}); });    // gets from fund
+  return out;
+}
+
+/* sum a set of txns into expense + per-person "দিয়েছে" (fund+personal) */
+function periodSummary(g,txns){
+  const expense=txns.filter(x=>x.type==='pool'||x.type==='personal').reduce((a,b)=>a+b.amt,0);
+  const gaveBy=g.members.map(m=>{
+    const mt=txns.filter(x=>x.uid===m.id);
+    const gave=mt.filter(x=>x.type==='fund'||x.type==='personal').reduce((a,b)=>a+b.amt,0);
+    return {name:m.name,gave};
+  }).filter(x=>x.gave>0);
+  return {expense,gaveBy};
+}
+const bnMonths=['জানু','ফেব্রু','মার্চ','এপ্রিল','মে','জুন','জুলাই','আগস্ট','সেপ্টে','অক্টো','নভে','ডিসে'];
+
+/* ---------- dashboard ---------- */
+function openGroup(gid,silent){
+  curGroupId=gid;
+  const g=DB.groups.find(x=>x.id===gid);
+  if(!g){go('s-groups');return;}
+  if(!silent) listenActivity(gid);
+  const c=compute(g);
+  $('dashTitle').firstChild.textContent=g.name;
+  $('dashSub').textContent=(g.mode==='mess'?'মেস':'ফ্যামিলি')+' • '+g.members.length+' জন';
+  let html='';
+
+  /* stat grid */
+  if(g.mode==='mess'){
+    html+=`<div class="stat-grid">
+      <div class="stat accent"><div class="lbl">মোট খরচ</div><div class="val">${tk(c.totalExpense)}</div></div>
+      <div class="stat t-teal"><div class="lbl">মোট জমা</div><div class="val">${tk(c.totalDeposit)}</div></div>
+      <div class="stat t-orange"><div class="lbl">জনপ্রতি খরচ</div><div class="val">${tk(c.perHead)}</div></div>
+      <div class="stat t-green"><div class="lbl">ফান্ড ব্যালেন্স</div><div class="val">${tk(c.fundBalance)}</div></div>
+    </div>`;
+  }else{
+    html+=`<div class="stat-grid">
+      <div class="stat accent"><div class="lbl">মোট খরচ</div><div class="val">${tk(c.totalExpense)}</div></div>
+      <div class="stat t-teal"><div class="lbl">মোট জমা</div><div class="val">${tk(c.totalDeposit)}</div></div>
+      <div class="stat t-green full"><div class="lbl">ফান্ড ব্যালেন্স</div><div class="val">${tk(c.fundBalance)}</div></div>
+    </div>`;
+  }
+
+  /* ---------- build each section ---------- */
+
+  /* entries (shown first) */
+  const isAdmin = g.adminId===meId();
+  let secEntries=`<div class="panel lead">`;
+  const recent=[...c.t].sort((a,b)=>b.date-a.date).slice(0,50);
+  if(!recent.length){secEntries+=`<div class="settle">এখনো কোনো এন্ট্রি নেই। নিচের + চাপুন।</div>`;}
+  const tIco={fund:'💰',pool:'🛒',personal:'👛'};
+  const tLbl={fund:'ফান্ডে জমা',pool:'ফান্ড থেকে খরচ',personal:'নিজ হাতে খরচ (জমা+খরচ)'};
+  recent.forEach(x=>{
+    const d=new Date(x.date),ds=d.getDate()+'/'+(d.getMonth()+1);
+    const canEdit = x.uid===meId() || isAdmin;
+    const tap = canEdit ? ` class="txn tap" onclick="openTxnActions('${x.id}')"` : ` class="txn"`;
+    secEntries+=`<div${tap}><div class="ti ${x.type}">${tIco[x.type]}</div>
+      <div class="td"><b>${x.un}</b><small>${tLbl[x.type]}${x.note?' • '+x.note:''} • ${ds}</small></div>
+      <div class="tamt">${tk(x.amt)}${canEdit?'<span class="chev">›</span>':''}</div></div>`;
+  });
+  secEntries+=`</div>`;
+
+  /* who spent how much */
+  const spendColors=['#1a7aaa','#f47920','#6d4bc4','#15803d','#d4477e','#0d9488'];
+  const maxSpent=Math.max(1,...c.byUser.map(u=>u.spent));
+  let secSpent=`<div class="panel lead-orange">`;
+  [...c.byUser].sort((a,b)=>b.spent-a.spent).forEach((u,i)=>{
+    const col=spendColors[i%spendColors.length];
+    secSpent+=`<div class="row"><div class="av" style="background:${col}1a;color:${col}">${initials(u.name)}</div>
+      <div class="nm"><b>${u.name}</b>
+        <div class="bd-bar" style="margin:5px 0 0"><i style="width:${u.spent/maxSpent*100}%;background:${col}"></i></div>
+        <small style="display:block;margin-top:4px">ফান্ড থেকে ${tk(u.poolSpent)} • নিজ হাতে ${tk(u.pers)}</small></div>
+      <div class="rt" style="color:${col}">${tk(u.spent)}</div></div>`;
+  });
+  secSpent+=`<div class="row" style="background:rgba(251,146,60,.1)"><div class="nm"><b>সর্বমোট খরচ</b></div><div class="rt" style="color:var(--orange);font-size:16px">${tk(c.totalExpense)}</div></div></div>`;
+
+  /* members — contribution / balance */
+  let secMembers=`<div class="panel lead-purple">`;
+  c.byUser.forEach(u=>{
+    const right = g.mode==='mess'
+      ? `<div class="rt ${u.net>=0?'pos':'neg'}">${u.net>=0?'পাবে ':'দিবে '}${tk(Math.abs(u.net))}</div>`
+      : `<div class="rt">${tk(u.gave+u.pers)}</div>`;
+    secMembers+=`<div class="row"><div class="av">${initials(u.name)}</div>
+      <div class="nm"><b>${u.name}</b><small>ফান্ডে ${tk(u.gave)} • নিজ হাতে খরচ ${tk(u.pers)}</small></div>
+      ${right}</div>`;
+  });
+  secMembers+=`</div>`;
+
+  /* settlement (mess only) */
+  let secSettle='';
+  if(g.mode==='mess'){
+    if(g.members.length<2){
+      secSettle=`<div class="all-clear" style="color:var(--muted);font-weight:600">
+        সেটেলমেন্টের জন্য কমপক্ষে ২ জন সদস্য দরকার।<br>কোড <b style="color:var(--neon)">${g.code}</b> শেয়ার করে সদস্য যোগ করুন।
+        <div style="margin-top:14px;display:flex;justify-content:space-around;font-size:13px">
+          <div>মোট জমা<br><b style="color:var(--teal);font-size:16px">${tk(c.totalDeposit)}</b></div>
+          <div>ফান্ডে আছে<br><b style="color:var(--good);font-size:16px">${tk(c.fundBalance)}</b></div>
+        </div>
+      </div>`;
+    }else{
+      const s=settleFund(c.byUser);
+      if(!s.length){secSettle=`<div class="all-clear">✓ সব হিসাব মেলানো</div>`;}
+      else{
+        s.forEach(x=>{
+          if(x.kind==='in'){
+            secSettle+=`<div class="settle-card in"><div class="sav person">${initials(x.name)}</div>
+              <div class="sflow"><b>${x.name} → ফান্ড</b><small>ফান্ডে জমা দিবে</small></div>
+              <div class="s-amt neg">${tk(x.amt)}</div></div>`;
+          }else{
+            secSettle+=`<div class="settle-card out"><div class="sav fund">💰</div>
+              <div class="sflow"><b>ফান্ড → ${x.name}</b><small>ফান্ড থেকে ফেরত পাবে</small></div>
+              <div class="s-amt pos">${tk(x.amt)}</div></div>`;
+          }
+        });
+      }
+    }
+  }
+
+  /* monthly report (family only) */
+  let secReport='';
+  if(g.mode==='family'){
+    const now=new Date(),m0=new Date(now.getFullYear(),now.getMonth(),1).getTime();
+    const mt=c.t.filter(x=>x.date>=m0);
+    const mPool=mt.filter(x=>x.type==='pool').reduce((a,b)=>a+b.amt,0);
+    const mPers=mt.filter(x=>x.type==='personal').reduce((a,b)=>a+b.amt,0);
+    const mFundDep=mt.filter(x=>x.type==='fund').reduce((a,b)=>a+b.amt,0);
+    const mDeposit=mFundDep+mPers;
+    const mSpent=mPool+mPers, tot=mSpent||1;
+    const mBal=mDeposit-mSpent;
+    secReport=`<div class="report-card lead-green">
+        <div class="rc-top"><span class="rc-lbl">মোট খরচ এ মাসে</span><span class="rc-big">${tk(mSpent)}</span></div>
+        <div class="donut-wrap">
+          <div class="donut" style="background:conic-gradient(var(--good) 0 ${mPool/tot*100}%, var(--orange) ${mPool/tot*100}% 100%)">
+            <div class="dc"><b>${tk(mSpent)}</b><span>মোট</span></div>
+          </div>
+          <div class="legend">
+            <div class="leg-row"><span class="leg-dot" style="background:var(--good)"></span><span class="leg-name">ফান্ড থেকে খরচ</span><span class="leg-val">${tk(mPool)}</span></div>
+            <div class="leg-row"><span class="leg-dot" style="background:var(--orange)"></span><span class="leg-name">নিজ হাতে খরচ</span><span class="leg-val">${tk(mPers)}</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="report-card lead">
+        <div class="recon">
+          <div class="rec-row"><span>ফান্ডে মোট জমা</span><b style="color:var(--teal)">${tk(mDeposit)}</b></div>
+          <div class="rec-row sub">এর মধ্যে নিজ হাতে ${tk(mPers)}</div>
+          <div class="rec-row"><span>− মোট খরচ</span><b style="color:var(--orange)">${tk(mSpent)}</b></div>
+          <div class="rec-row total"><span>= ফান্ড ব্যালেন্স</span><b>${tk(mBal)}</b></div>
+        </div>
+      </div>`;
+  }
+
+  /* activity feed */
+  const actIco={create:'✨',join:'➕',add:'🧾',edit:'✏️',delete:'🗑️'};
+  let secAct=`<div class="panel lead-purple">`;
+  const acts=DB.activity.filter(a=>a.gid===gid).sort((a,b)=>b.date-a.date).slice(0,60);
+  if(!acts.length){secAct+=`<div class="settle">এখনো কোনো কার্যকলাপ নেই।</div>`;}
+  acts.forEach(a=>{
+    const d=new Date(a.date),ds=d.getDate()+'/'+(d.getMonth()+1)+' '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
+    secAct+=`<div class="txn"><div class="ti fund">${actIco[a.action]||'•'}</div>
+      <div class="td"><b>${a.un}</b><small>${a.desc} • ${ds}</small></div></div>`;
+  });
+  secAct+=`</div>`;
+
+  /* yearly + monthly breakdown */
+  if(viewYear===null) viewYear=new Date().getFullYear();
+  const yTx=c.t.filter(x=>new Date(x.date).getFullYear()===viewYear);
+  const yS=periodSummary(g,yTx);
+  let secYearly=`<div class="report-card lead">
+    <div class="yhead">
+      <button class="ynav" onclick="changeYear(-1)">‹</button>
+      <div class="ytitle">${viewYear}<span>সাল</span></div>
+      <button class="ynav" onclick="changeYear(1)">›</button>
+    </div>
+    <div class="rec-row" style="justify-content:space-between;margin-top:8px"><span>বছরে মোট খরচ</span><b style="color:var(--orange);font-size:19px">${tk(yS.expense)}</b></div>
+    ${yS.gaveBy.length?`<div class="gavewrap">`+yS.gaveBy.map(p=>`<span class="givechip">${p.name} <b>${tk(p.gave)}</b></span>`).join('')+`</div>`:''}
+  </div>`;
+  const monthsData=[];
+  for(let m=0;m<12;m++){
+    const mTx=yTx.filter(x=>new Date(x.date).getMonth()===m);
+    if(mTx.length) monthsData.push(Object.assign({m},periodSummary(g,mTx)));
+  }
+  if(!monthsData.length){
+    secYearly+=`<div class="all-clear" style="color:var(--muted);font-weight:600">${viewYear} সালে কোনো এন্ট্রি নেই।</div>`;
+  }else{
+    const maxM=Math.max(1,...monthsData.map(x=>x.expense));
+    secYearly+=`<div class="panel lead-orange">`;
+    monthsData.sort((a,b)=>b.m-a.m).forEach(md=>{
+      secYearly+=`<div class="mrow">
+        <div class="mrow-top"><b>${bnMonths[md.m]} ${viewYear}</b><span class="mexp">খরচ ${tk(md.expense)}</span></div>
+        <div class="bd-bar" style="margin:7px 0"><i style="width:${md.expense/maxM*100}%;background:var(--orange)"></i></div>
+        <div class="mgave">${md.gaveBy.length?'দিয়েছে → '+md.gaveBy.map(p=>p.name+' '+tk(p.gave)).join(' · '):'কেউ জমা দেয়নি'}</div>
+      </div>`;
+    });
+    secYearly+=`</div>`;
+  }
+
+  /* ---------- tab bar + panes ---------- */
+  const tabs = g.mode==='mess'
+    ? [['spent','খরচ',secSpent],['settle','সেটেল',secSettle],['members','সদস্য',secMembers],['act','লগ',secAct],['year','মাসিক',secYearly]]
+    : [['spent','খরচ',secSpent],['members','দিয়েছে',secMembers],['report','রিপোর্ট',secReport],['act','লগ',secAct],['year','মাসিক',secYearly]];
+
+  html+=`<div class="tabbar">`;
+  tabs.forEach((t,i)=>{ if(t[0]==='year')return; html+=`<button class="tabbtn${i===0?' on':''}" data-tabname="${t[0]}" onclick="switchTab('${t[0]}',this)">${t[1]}</button>`; });
+  html+=`</div><div class="tabwrap">`;
+  tabs.forEach((t,i)=>{ html+=`<div class="tabpane${i===0?' on':''}" data-tab="${t[0]}">${t[2]}</div>`; });
+  html+=`</div>`;
+
+  /* recent entries below tabs */
+  html+=`<p class="sec-title">🧾 সাম্প্রতিক এন্ট্রি</p>`+secEntries;
+
+  $('dashBody').innerHTML=html;
+  go('s-dash');
+}
+
+function switchTab(name,btn){
+  document.querySelectorAll('#dashBody .tabbtn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  document.querySelectorAll('#dashBody .tabpane').forEach(p=>p.classList.toggle('on',p.dataset.tab===name));
+  scrollTabsIntoView();
+}
+function showTab(name){
+  document.querySelectorAll('#dashBody .tabbtn').forEach(b=>b.classList.toggle('on',b.getAttribute('data-tabname')===name));
+  document.querySelectorAll('#dashBody .tabpane').forEach(p=>p.classList.toggle('on',p.dataset.tab===name));
+  scrollTabsIntoView();
+}
+function scrollTabsIntoView(){
+  const bar=document.querySelector('#dashBody .tabbar');
+  if(!bar)return;
+  const top=bar.getBoundingClientRect().top+window.scrollY-72; // 72 = sticky header clearance
+  window.scrollTo({top:Math.max(0,top),behavior:'smooth'});
+}
+function changeYear(d){ viewYear+=d; openGroup(curGroupId); showTab('year'); }
+
+/* ---------- menu drawer ---------- */
+function openMenu(){
+  const g=DB.groups.find(x=>x.id===curGroupId); if(!g)return;
+  $('drawAv').textContent=initials(meName());
+  $('drawName').textContent=meName();
+  $('drawGroup').textContent=g.name+' • '+(g.mode==='mess'?'মেস':'ফ্যামিলি');
+  $('drawCode').textContent=g.code;
+  $('drawMembers').textContent='সদস্য ('+g.members.length+' জন)';
+  $('drawerBg').classList.add('show'); $('drawer').classList.add('show');
+}
+function closeMenu(){ $('drawerBg').classList.remove('show'); $('drawer').classList.remove('show'); }
+function menuCopyCode(){ const g=DB.groups.find(x=>x.id===curGroupId); if(g)copyCode(g.code); }
+function menuSettings(){ closeMenu(); openSettings(); }
+function menuGroups(){ closeMenu(); go('s-groups'); }
+function menuLogout(){ closeMenu(); logout(); }
+
+/* ---------- bottom nav ---------- */
+function navHome(){ if(curGroupId) openGroup(curGroupId); else go('s-groups'); }
+function navReport(){ if(!curGroupId){go('s-groups');return;} openGroup(curGroupId); showTab('year'); }
+
+/* ---------- add / edit txn ---------- */
+function openAdd(){
+  editingTxnId=null;
+  $('addTitle').textContent='নতুন এন্ট্রি';
+  pickType('fund');$('txnAmt').value='';$('txnNote').value='';
+  $('addSheet').classList.add('show');
+}
+function closeAdd(){$('addSheet').classList.remove('show');}
+function pickType(t){
+  pendingType=t;
+  document.querySelectorAll('#typeSeg button').forEach(b=>b.classList.toggle('on',b.dataset.t===t));
+  const h={fund:'ফান্ডে টাকা = পুল-এ জমা দিলেন',pool:'ফান্ড থেকে খরচ = জমানো টাকা থেকে খরচ',personal:'নিজ হাতে খরচ = নিজের পকেট থেকে সরাসরি দিলেন'};
+  $('typeHint').textContent=h[t];
+}
+function saveTxn(){
+  const amt=parseFloat($('txnAmt').value);
+  if(!amt||amt<=0){toast('সঠিক টাকার পরিমাণ দিন');return;}
+  const note=$('txnNote').value.trim();
+  const lbl={fund:'ফান্ডে জমা',pool:'ফান্ড থেকে খরচ',personal:'নিজ হাতে খরচ'};
+  const gid=curGroupId, type=pendingType;
+  if(editingTxnId){
+    const id=editingTxnId; editingTxnId=null;
+    fdb.collection('transactions').doc(id).update({type,amt,note})
+      .then(()=>logAct(gid,'edit',`একটি এন্ট্রি বদলাল (${lbl[type]} ${tk(amt)})`))
+      .then(()=>toast('আপডেট হয়েছে'))
+      .catch(e=>toast('সমস্যা: '+(e.code||e.message)));
+  }else{
+    fdb.collection('transactions').add({gid,uid:meId(),un:meName(),type,amt,note,date:Date.now()})
+      .then(()=>logAct(gid,'add',`একটি এন্ট্রি যোগ করল (${lbl[type]} ${tk(amt)})`))
+      .then(()=>toast('সেভ হয়েছে'))
+      .catch(e=>toast('সমস্যা: '+(e.code||e.message)));
+  }
+  closeAdd(); // dashboard refreshes automatically via onSnapshot
+}
+
+/* ---------- txn actions (edit / delete) ---------- */
+function openTxnActions(tid){
+  const x=DB.txns.find(t=>t.id===tid); if(!x)return;
+  const g=DB.groups.find(gg=>gg.id===curGroupId);
+  if(!(x.uid===meId() || g.adminId===meId())){toast('শুধু এন্ট্রির মালিক বা অ্যাডমিন বদলাতে পারবে');return;}
+  pendingActTxn=tid;
+  const lbl={fund:'ফান্ডে জমা',pool:'ফান্ড থেকে খরচ',personal:'নিজ হাতে খরচ'};
+  $('actInfo').textContent=`${x.un} • ${lbl[x.type]} • ${tk(x.amt)}${x.note?' • '+x.note:''}`;
+  $('actSheet').classList.add('show');
+}
+function closeActSheet(){$('actSheet').classList.remove('show');}
+function startEdit(){
+  const x=DB.txns.find(t=>t.id===pendingActTxn); if(!x){closeActSheet();return;}
+  closeActSheet();
+  editingTxnId=x.id;
+  $('addTitle').textContent='এন্ট্রি এডিট';
+  pickType(x.type); $('txnAmt').value=x.amt; $('txnNote').value=x.note||'';
+  $('addSheet').classList.add('show');
+}
+function startDelete(){
+  const x=DB.txns.find(t=>t.id===pendingActTxn); if(!x){closeActSheet();return;}
+  closeActSheet();
+  if(!confirm('এই এন্ট্রি মুছে ফেলবেন?'))return;
+  const lbl={fund:'ফান্ডে জমা',pool:'ফান্ড থেকে খরচ',personal:'নিজ হাতে খরচ'};
+  fdb.collection('transactions').doc(x.id).delete()
+    .then(()=>logAct(curGroupId,'delete',`একটি এন্ট্রি মুছল (${lbl[x.type]} ${tk(x.amt)})`))
+    .then(()=>toast('মুছে ফেলা হয়েছে'))
+    .catch(e=>toast('সমস্যা: '+(e.code||e.message)));
+}
+
+/* ---------- settings ---------- */
+function openSettings(){
+  const g=DB.groups.find(x=>x.id===curGroupId); if(!g)return;
+  const isAdmin=g.adminId===meId();
+  let html=`<div class="invite"><p>গ্রুপ কোড — শেয়ার করে সদস্য যোগ করুন</p>
+    <div class="code">${g.code}</div>
+    <button class="btn sm navy" onclick="copyCode('${g.code}')">কোড কপি করুন</button></div>`;
+
+  html+=`<p class="sec-title">👥 সদস্য (${g.members.length})</p><div class="panel">`;
+  g.members.forEach(m=>{
+    const admin=m.id===g.adminId?`<small style="color:var(--neon)">অ্যাডমিন</small>`:'';
+    const you=m.id===meId()?` <small style="color:var(--orange)">আপনি</small>`:'';
+    html+=`<div class="row"><div class="av">${initials(m.name)}</div>
+      <div class="nm"><b>${m.name}</b>${admin}${you}</div></div>`;
+  });
+  html+=`</div>`;
+
+  /* admin-only controls */
+  if(isAdmin){
+    html+=`<p class="sec-title">⚙ অ্যাডমিন</p><div class="panel">
+      <div class="row tap" onclick="renameGroup()"><div class="nm"><b>গ্রুপের নাম পরিবর্তন</b><small>${g.name}</small></div><div class="chev">›</div></div>
+      <div class="row tap" onclick="regenCode()"><div class="nm"><b>জয়েন কোড পরিবর্তন</b><small>নতুন কোড বানান (পুরনোটি বাতিল)</small></div><div class="chev">›</div></div>
+    </div>`;
+  }
+
+  /* per-user controls */
+  html+=`<p class="sec-title">👤 আমার অ্যাকাউন্ট</p><div class="panel">
+    <div class="row tap" onclick="changeMyName()"><div class="nm"><b>নাম পরিবর্তন</b><small>${meName()}</small></div><div class="chev">›</div></div>
+    <div class="row tap" onclick="changePass()"><div class="nm"><b>পাসওয়ার্ড পরিবর্তন</b><small>ইমেইলে রিসেট লিংক</small></div><div class="chev">›</div></div>
+  </div>`;
+
+  html+=`<p class="sec-title">গ্রুপ তথ্য</p><div class="panel">
+    <div class="row"><div class="nm"><b>ধরন</b></div><div class="rt">${g.mode==='mess'?'মেস':'ফ্যামিলি'}</div></div>
+    <div class="row"><div class="nm"><b>সেটেলমেন্ট</b></div><div class="rt">${g.mode==='mess'?'চালু':'বন্ধ'}</div></div>
+  </div>`;
+  html+=`<button class="btn ghost" onclick="logout()" style="margin-top:18px">লগ আউট (${meName()})</button>`;
+  $('settBody').innerHTML=html;
+  go('s-settings');
+}
+
+/* admin: rename group */
+function renameGroup(){
+  const g=DB.groups.find(x=>x.id===curGroupId); if(!g||g.adminId!==meId()){toast('শুধু অ্যাডমিন পারবে');return;}
+  const nm=prompt('গ্রুপের নতুন নাম', g.name); if(nm===null)return;
+  const name=nm.trim(); if(!name){toast('নাম খালি');return;}
+  fdb.collection('groups').doc(g.id).update({name})
+    .then(()=>logAct(g.id,'rename','গ্রুপের নাম বদলাল: '+name))
+    .then(()=>{toast('নাম পরিবর্তন হয়েছে'); openSettings();})
+    .catch(e=>toast('সমস্যা: '+(e.code||e.message)));
+}
+/* admin: regenerate join code */
+function regenCode(){
+  const g=DB.groups.find(x=>x.id===curGroupId); if(!g||g.adminId!==meId()){toast('শুধু অ্যাডমিন পারবে');return;}
+  if(!confirm('নতুন কোড বানালে পুরনো কোড আর কাজ করবে না। নিশ্চিত?'))return;
+  const code=newCode();
+  fdb.collection('groups').doc(g.id).update({code})
+    .then(()=>logAct(g.id,'code','জয়েন কোড পরিবর্তন করল'))
+    .then(()=>{toast('নতুন কোড: '+code); openSettings();})
+    .catch(e=>toast('সমস্যা: '+(e.code||e.message)));
+}
+/* any user: change own name (propagates to groups + own txns) */
+async function changeMyName(){
+  const nm=prompt('আপনার নতুন নাম', meName()); if(nm===null)return;
+  const name=nm.trim(); if(!name){toast('নাম খালি');return;}
+  try{
+    await fdb.collection('users').doc(meId()).set({name},{merge:true});
+    DB.userName=name; $('hiName').textContent=name;
+    const gb=fdb.batch();
+    DB.groups.forEach(g=>{
+      if((g.memberIds||[]).includes(meId())){
+        const mem=(g.members||[]).map(m=>m.id===meId()?Object.assign({},m,{name}):m);
+        gb.update(fdb.collection('groups').doc(g.id),{members:mem});
+      }
+    });
+    await gb.commit();
+    const tq=await fdb.collection('transactions').where('uid','==',meId()).get();
+    if(!tq.empty){ const tb=fdb.batch(); tq.docs.forEach(d=>tb.update(d.ref,{un:name})); await tb.commit(); }
+    toast('নাম পরিবর্তন হয়েছে'); openSettings();
+  }catch(e){toast('সমস্যা: '+(e.code||e.message));}
+}
+/* any user: change password via reset email */
+function changePass(){
+  const em=auth.currentUser&&auth.currentUser.email;
+  if(!em){toast('ইমেইল পাওয়া যায়নি');return;}
+  auth.sendPasswordResetEmail(em)
+    .then(()=>toast('রিসেট লিংক পাঠানো হয়েছে: '+em))
+    .catch(e=>toast(authErr(e)));
+}
+
+function copyCode(c){
+  if(navigator.clipboard)navigator.clipboard.writeText(c);
+  toast('কোড কপি হয়েছে: '+c);
+}
+
+/* init: auth state listener (above) handles routing to login/groups */
+</script>
+</body>
+</html>
