@@ -1,6 +1,6 @@
 /* Our Family — service worker
    প্রতিবার নতুন ডিপ্লয়ে নিচের ভার্সন বাড়ান (v1 → v2 → ...) */
-const CACHE_NAME = 'our-family-v17';
+const CACHE_NAME = 'our-family-v18';
 const ASSETS = [
   './',
   './index.html',
